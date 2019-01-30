@@ -6,7 +6,7 @@
 
 # TODO features
 # 1) detect max cost and size the cost bar graph max width accordingly
-# 2) add better support for multiple query blocks
+# 2) add better support for multiple query blocks - remember previously computed query block cost to carry forward
 # 3) HTMLize output
 
 from __future__ import print_function
@@ -97,12 +97,14 @@ for n, l in enumerate(f):
     leadingtable = l.split()[2].split("#")[0]
     currentjoinorder="%s - %s" % (joinorderid, leadingtable)
     costsofar=sta.get(leadingtable, -1)
-    if costsofar == -1: 
+    if costsofar < 1:
       #print("warning: costsofar for leading table %s = -1: possibly a query block is driving" % leadingtable)
-      costsofar=0
+      costsofar = 1
+    #TODO: if costsofar == -1: 
+      # TODO: costsofar=0
     #print("\n======" ,l)
     #print("tanel: leadingtable: %s: %s: %s" % (sta.get(leadingtable), qb, leadingtable))
-    #print("%s %s: %s %s" % (qb, '->'.join(fulljoinorder), leadingtable, costsofar))
+    print("%s %s: %s %s" % (qb, '->'.join(fulljoinorder), leadingtable, costsofar))
     print("|%-30s| %8s+ | %-20s | %-20s | %s: %s" % ('#' * int(round(math.log(costsofar,2))), n, costsofar, qb, currentjoinorder, costsofar-prevcost))
 
   if l.startswith('Now joining:'):
@@ -113,7 +115,9 @@ for n, l in enumerate(f):
   # record intermediate cost in case CBO bails out evaluating a join order early 
   # as its cost is already higher than a previously discovered best cost
   if l.startswith('Best NL cost:') or l.startswith('SM cost:') or l.startswith('HA cost:'):
-    bailedoutcost=float(l.split(':')[1].strip())
+    bailedoutcost=float(l.split(':')[1].strip().split()[0].strip())
+    # the extra strip is needed due to "swapped" costs: "HA cost: 3091.221863 swapped"
+
 
   # CBO found a best join order so far
   if l.startswith('Best:: JoinMethod:'):
