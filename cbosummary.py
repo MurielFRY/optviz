@@ -95,7 +95,7 @@ for n, l in enumerate(f):
 
     joinorders.append(qb + " " + l)
     leadingtable = l.split()[2].split("#")[0]
-    currentjoinorder="%s - %s" % (joinorderid, leadingtable)
+    currentjoinorder="%04d - %s" % (joinorderid, leadingtable)
     costsofar=sta.get(leadingtable, -1)
     if costsofar < 1:
       #print("warning: costsofar for leading table %s = -1: possibly a query block is driving" % leadingtable)
